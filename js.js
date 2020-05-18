@@ -136,7 +136,7 @@ function calculateStuff(){
         let me = spells[spell];
         let manacost = cost(me.base, me.percent/100, maximum);
         if(me.customtime){
-            spelldisplays[i].innerHTML = me.name+":<br>Mana cost: " + manacost  +"<br>"+ (averageGFDtime(maximum, buffs, gpoc, edifice));
+            spelldisplays[i].innerHTML = me.name+":<br>Mana cost: " + manacost  +"<br>"+ (averageGFDtime(maximum, !buffs, gpoc, edifice));
         }else{
             spelldisplays[i].innerHTML = me.name+":<br>Mana cost: " +  manacost  +"<br>"+ (maximum<manacost? "    Unable to cast":" Recharge time: "+Math.round(getRegenTime(maximum-manacost, maximum)*1000)/1000+" seconds");
         }
