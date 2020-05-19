@@ -19,7 +19,7 @@ const spells ={
     },
     se:{
         base:20,
-        percent:80,
+        percent:75,
         gfd:false,
         name:"Spontaneous Edifice"
     },
