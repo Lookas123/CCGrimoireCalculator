@@ -62,6 +62,8 @@ const manainfo = document.getElementById("manainfo");
 const st = document.getElementById("Buffs");
 const se = document.getElementById("SE");
 const ra = document.getElementById("gpoc");
+const dogfd = document.getElementById("dogfd");
+const multi = document.getElementById("multi");
 let spelldisplays = [];
 for(i=1; i <=9; i++){
     spelldisplays.push(document.getElementById("spell"+i))
@@ -76,46 +78,43 @@ function getRegenTime(start, max){
     return b/30;
 }
 
-function averageGFDtime(magic, buffs, gpoc, edifice){
+function averageGFDtime(magic, buffs, gpoc, edifice, layers, extra){
     let a = Math.floor(magic*0.05+3);
+    let curMax = Math.ceil(magic-extra)
     let b = 0;
     let c = 0;
     for(let spell in spells){
         let me = spells[spell];
         if(me.gfd){
             let price = cost(me.base,me.percent/100,magic)/2;
-            if(magic>a+price){
-                b+=getRegenTime(magic-price-a,magic);
+            if(curMax>a+price){
+                b+=layers>1?averageGFDtime(magic, buffs, gpoc, edifice, layers-1, price+a+extra):getRegenTime(magic-price-a-extra,magic);
                 c++;
             }
         }
     }
     //Stretch time
     let stprice = cost(8,0.2,magic)/2;
-    if(magic>a+stprice){
-        if(!buffs){
-        b+=getRegenTime(magic-stprice-a, magic);
-        }
+    if(curMax>a+stprice){
+        b+=layers>1?!buffs*averageGFDtime(magic, buffs, gpoc, edifice, layers-1, stprice+a+extra):!buffs*getRegenTime(magic-stprice-a-extra,magic);
         c++;
     }
     //Spontaneous Edifice
-    let seprice = cost(20,0.80,magic)/2;
-    if(magic>a+seprice){
-        b+=getRegenTime(magic-seprice-a, magic)/2;
+    let seprice = cost(20,0.75,magic)/2;
+    if(curMax>a+seprice){
+        let sebackfire=edifice?1:0
+        b+=layers>1?averageGFDtime(magic, buffs, gpoc, edifice, layers-1, seprice+a+extra)/2:getRegenTime(magic-seprice-a-extra,magic)/2;
         c++;
-        if(!edifice){
-            b+=getRegenTime(magic-seprice-a, magic)/2;
-        }
+        b+=layers>1?averageGFDtime(magic, buffs, gpoc, edifice, layers-1, extra+(a+seprice)*sebackfire)/2:getRegenTime(magic-((a+seprice)*sebackfire)-extra, magic)/2;
     }
     //Resurrect Abomination
     let raprice = cost(20,0.1,magic)/2;
-    if(magic>a+raprice){
-        if(!gpoc){
-            b+=getRegenTime(raprice, magic)
-        }
+    if(curMax>a+raprice){
+        b+=layers>1?gpoc*averageGFDtime(magic, buffs, gpoc, edifice, layers-1, seprice+a+extra):gpoc*getRegenTime(magic-a-raprice-extra, magic)
         c++;
     }
-    return c==0? " Unable to cast":" Average time to recharge magic: "+Math.round(b/c*1000)/1000;
+    if(isNaN(b)) return " Unable to cast";
+    return c==0? " Unable to cast":(Number(multi.value)==layers?" Average recharge time: ":0)+Math.round(b/c*1000)/1000;
 }
 function cost(base, percent, magic){
     return Math.floor(base+magic*percent);
@@ -123,22 +122,44 @@ function cost(base, percent, magic){
 function getMaxMagic(level, count){
     Math.floor(4+Math.pow(count,0.6)+Math.log((count+(level-1)*10)/15+1)*15);
 }
-function calculateStuff(){
+function calculateStuff(){   
+    if(count.value<1)count.value=1;
     let towers = Number(count.value);
-    let lvl = Number(level.value);
+    if(lvl.value<1)lvl.value=1;
+    let level = Number(lvl.value);
+    if(max.value>10000)max.value=10000;
+    if(max.value<1)max.value=1;
     let maximum = Number(max.value);
     let buffs = st.checked;
     let edifice = se.checked;
     let gpoc = ra.checked;
-    manainfo.innerHTML = "With those numbers, your maximum mana would be "+ Math.floor(4+Math.pow(towers,0.6)+Math.log((towers+(lvl-1)*10)/15+1)*15) +", and the lowest maximum mana you could reach would be " + (5+Math.floor(Math.log((1+(lvl-1)*10)/15+1)*15));
+    let calcGFD = dogfd.checked;
+    if(multi.value>50)multi.value=50;
+    if(multi.value<1)multi.value=1;
+    let castnum = Number(multi.value);
+    let minmana = (5+Math.floor(Math.log((1+(level-1)*10)/15+1)*15));
+    manainfo.innerHTML = "With those numbers, your maximum mana would be "+ Math.floor(4+Math.pow(towers,0.6)+Math.log((towers+(level-1)*10)/15+1)*15) +", and the lowest maximum mana you could reach would be " + minmana;
     let i = 0;
     for(spell in spells){
         let me = spells[spell];
-        let manacost = cost(me.base, me.percent/100, maximum);
+        let mana = maximum;
+        let manacoststr = "";
+        let realmanacost = 0;
+        for(let e = castnum; e>0; e--){
+            let manacost = cost(me.base, me.percent/100, mana);
+            mana-=manacost
+            mana = Math.max(mana,minmana);
+            manacoststr += manacost;
+            realmanacost += Number(manacost);
+            if(me.customtime!=undefined) break;
+            if(e>1){
+                manacoststr+= " + "
+            }
+        }      
         if(me.customtime){
-            spelldisplays[i].innerHTML = me.name+":<br>Mana cost: " + manacost  +"<br>"+ (averageGFDtime(maximum, !buffs, gpoc, edifice));
+            if(calcGFD)spelldisplays[i].innerHTML = me.name+":<br>Mana cost: " + manacoststr  +"<br>"+ (averageGFDtime(maximum, !buffs, gpoc, edifice, castnum, 0));
         }else{
-            spelldisplays[i].innerHTML = me.name+":<br>Mana cost: " +  manacost  +"<br>"+ (maximum<manacost? "    Unable to cast":" Recharge time: "+Math.round(getRegenTime(maximum-manacost, maximum)*1000)/1000+" seconds");
+            spelldisplays[i].innerHTML = me.name+":<br>Mana cost: " +  manacoststr  +"<br>"+ (maximum<realmanacost? "    Unable to cast":" Recharge time: "+Math.round(getRegenTime(maximum-realmanacost, maximum)*1000)/1000+" seconds");
         }
         i++;
     }
