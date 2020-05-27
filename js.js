@@ -64,6 +64,8 @@ const se = document.getElementById("SE");
 const ra = document.getElementById("gpoc");
 const dogfd = document.getElementById("dogfd");
 const multi = document.getElementById("multi");
+const gudRGN = document.getElementById("gudRegen");
+let fasterRegen = false;
 let spelldisplays = [];
 for(i=1; i <=9; i++){
     spelldisplays.push(document.getElementById("spell"+i))
@@ -72,7 +74,8 @@ function getRegenTime(start, max){
     let a = start;
     let b = 0;
     while(a<max){
-        a+=Math.max(0.002,Math.pow(a/Math.max(max,100),0.5))*0.002
+        curMax = fasterRegen ? Math.ceil(a + 1) : max;
+        a+=Math.max(0.002,Math.pow(a/Math.max(curMax,100),0.5))*0.002
         b++;
     }
     return b/30;
@@ -123,6 +126,7 @@ function getMaxMagic(level, count){
     Math.floor(4+Math.pow(count,0.6)+Math.log((count+(level-1)*10)/15+1)*15);
 }
 function calculateStuff(){   
+    fasterRegen = gudRGN.checked;
     if(count.value<1)count.value=1;
     let towers = Number(count.value);
     if(lvl.value<1)lvl.value=1;

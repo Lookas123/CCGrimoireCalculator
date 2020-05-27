@@ -12,7 +12,9 @@
   <input id = "count" type="number" min="1" value="1" oninput="calculateStuff()"></input><br>
   <div id = "manainfo">With those numbers, your maximum mana would be 5, and the lowest maximum mana you could reach would be 5</div>
   Maximum mana:
-  <input id = "maxmana" type="number" min="5" value = "5" oninput="calculateStuff()"></input>
+  <input id = "maxmana" type="number" min="5" value = "5" oninput="calculateStuff()"></input><br>
+  <input type="checkbox" name="5" id = "gudRegen" oninput="calculateStuff()">
+  <label for="5">Assume maximum mana for regen purposes is always max(100, current mana + 1)   Don't check if you don't know what this means</label><br>
   <p margin_down = 0px>Gambler's fever dream checks: <br>
   <input type="checkbox" name="1" id = "Buffs" oninput="calculateStuff()">
   <label for="1"> Buffs active</label><br>
@@ -21,7 +23,7 @@
   <input type="checkbox" name="3" id = "gpoc" oninput="calculateStuff()">
   <label for="3"> Grandmapocalypse is active</label><br>
   <input type="checkbox" name="4" id = "dogfd" checked oninput="calculateStuff()">
-  <label for="4"> Do Gambler's fever dream(disabling this option will prevent some lag or even crashing with high multi-cast numbers)</label><br><br>
+  <label for="4"> Calculate it at all(disabling this option will prevent some lag or even crashing with high multi-cast numbers)</label><br><br>
   How many times do you want to cast the spell(assumes sell strats):
   <input id = "multi" type="number" min="1" value = "1" oninput="calculateStuff()"></input>
   </p>
