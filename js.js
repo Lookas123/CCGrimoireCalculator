@@ -162,6 +162,7 @@ function calculateStuff(){
         }      
         if(me.customtime){
             if(calcGFD)spelldisplays[i].innerHTML = me.name+":<br>Mana cost: " + manacoststr  +"<br>"+ (averageGFDtime(maximum, !buffs, gpoc, edifice, castnum, 0));
+            else spelldisplays[i].innerHTML = me.name+":<br>Not calculating this right now<br> (Due to your settings)";
         }else{
             spelldisplays[i].innerHTML = me.name+":<br>Mana cost: " +  manacoststr  +"<br>"+ (maximum<realmanacost? "    Unable to cast":" Recharge time: "+Math.round(getRegenTime(maximum-realmanacost, maximum)*1000)/1000+" seconds");
         }
