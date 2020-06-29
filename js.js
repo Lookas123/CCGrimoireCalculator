@@ -105,7 +105,7 @@ function averageGFDtime(magic, buffs, gpoc, edifice, layers, extra){
     //Spontaneous Edifice
     let seprice = cost(20,0.75,magic)/2;
     if(curMax>a+seprice){
-        let sebackfire=edifice?1:0
+        let sebackfire=edifice?0:1
         b+=layers>1?averageGFDtime(magic, buffs, gpoc, edifice, layers-1, seprice+a+extra)/2:getRegenTime(magic-seprice-a-extra,magic)/2;
         c++;
         b+=layers>1?averageGFDtime(magic, buffs, gpoc, edifice, layers-1, extra+(a+seprice)*sebackfire)/2:getRegenTime(magic-((a+seprice)*sebackfire)-extra, magic)/2;
@@ -170,18 +170,3 @@ function calculateStuff(){
     }
 }
 calculateStuff()
-/*
-let a = 0;
-let bestTime = 0;
-for(let i=5; i<150; i++){
-    let b = averageGFDtime(i, false, false, (i<90)?true:false)
-    if((b<bestTime||a==0)
-        && 0.65*i>8
-        && !isNaN(b)
-        ){
-        a = i;
-        bestTime=b;
-        console.log(bestTime + " seconds with a maximum mana of " + a);
-    }
-}
-*/
