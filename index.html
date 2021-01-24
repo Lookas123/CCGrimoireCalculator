@@ -13,17 +13,17 @@
   <div id = "manainfo">With those numbers, your maximum mana would be 5, and the lowest maximum mana you could reach would be 5</div>
   Maximum mana:
   <input id = "maxmana" type="number" min="5" value = "5" onchange="calculateStuff()"></input><br>
-  <input type="checkbox" name="5" id = "gudRegen" onchange="calculateStuff()">
-  <label for="5">Assume maximum mana for regen purposes is always max(100, current mana + 1)   Don't check if you don't know what this means</label><br>
+  <input type="checkbox" id = "gudRegen" onchange="calculateStuff()">
+  <label for="gudRegen">Assume maximum mana for regen purposes is always max(100, current mana + 1)   Don't check if you don't know what this means</label><br>
   <p margin_down = 0px>Gambler's fever dream checks: <br>
-  <input type="checkbox" name="1" id = "Buffs" onchange="calculateStuff()">
-  <label for="1"> Buffs active</label><br>
-  <input type="checkbox" name="2" id = "SE" onchange="calculateStuff()">
-  <label for="2"> 400 of everything</label><br>
-  <input type="checkbox" name="3" id = "gpoc" onchange="calculateStuff()">
-  <label for="3"> Grandmapocalypse is active</label><br>
-  <input type="checkbox" name="4" id = "dogfd" checked onchange="calculateStuff()">
-  <label for="4"> Calculate it at all(disabling this option will prevent some lag or even crashing with high multi-cast numbers)</label><br><br>
+  <input type="checkbox" id = "Buffs" onchange="calculateStuff()">
+  <label for="Buffs"> Buffs active</label><br>
+  <input type="checkbox" id = "SE" onchange="calculateStuff()">
+  <label for="SE"> 400 of everything</label><br>
+  <input type="checkbox" id = "gpoc" onchange="calculateStuff()">
+  <label for="gpoc"> Grandmapocalypse is active</label><br>
+  <input type="checkbox" id = "dogfd" checked onchange="calculateStuff()">
+  <label for="dogfd"> Calculate it at all(disabling this option will prevent some lag or even crashing with high multi-cast numbers)</label><br><br>
   How many times do you want to cast the spell(assumes sell strats):
   <input id = "multi" type="number" min="1" value = "1" onchange="calculateStuff()"></input>
   </p>
