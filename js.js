@@ -30,8 +30,8 @@ const spells ={
         name:"Haggler's charm"
     },
     scp:{
-        base:20,
-        percent:10,
+        base:10,
+        percent:20,
         gfd:true,
         name:"Summon Crafty Pixies"
     },
