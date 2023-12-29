@@ -58,6 +58,9 @@ const spells ={
 const lvl = document.getElementById("level");
 const count = document.getElementById("count");
 const max = document.getElementById("maxmana");
+const calcBestMagic = document.getElementById("calcOptimal")
+const si = document.getElementById("SI");
+const rb = document.getElementById("RB");
 const manainfo = document.getElementById("manainfo");
 const st = document.getElementById("Buffs");
 const se = document.getElementById("SE");
@@ -65,6 +68,7 @@ const ra = document.getElementById("gpoc");
 const dogfd = document.getElementById("dogfd");
 const multi = document.getElementById("multi");
 const gudRGN = document.getElementById("gudRegen");
+let discount = 1;
 let fasterRegen = false;
 let spelldisplays = [];
 for(i=1; i <=9; i++){
@@ -82,7 +86,7 @@ function getRegenTime(start, max){
 }
 
 function averageGFDtime(magic, buffs, gpoc, edifice, layers, extra){
-    let a = Math.floor(magic*0.05+3);
+    let a = cost(3, 0.05, magic);
     let curMax = Math.ceil(magic-extra)
     let b = 0;
     let c = 0;
@@ -120,53 +124,93 @@ function averageGFDtime(magic, buffs, gpoc, edifice, layers, extra){
     return c==0? " Unable to cast":(Number(multi.value)==layers?" Average recharge time: ":0)+Math.round(b/c*1000)/1000;
 }
 function cost(base, percent, magic){
-    return Math.floor(base+magic*percent);
+    return Math.floor(base*discount+magic*percent*discount);
 }
-function getMaxMagic(level, count){
-    Math.floor(4+Math.pow(count,0.6)+Math.log((count+(level-1)*10)/15+1)*15);
-}
-function calculateStuff(){   
-    fasterRegen = gudRGN.checked;
-    if(count.value<1)count.value=1;
-    let towers = Number(count.value);
-    if(lvl.value<1)lvl.value=1;
-    let level = Number(lvl.value);
-    if(max.value>10000)max.value=10000;
-    if(max.value<1)max.value=1;
-    let maximum = Number(max.value);
-    let buffs = st.checked;
-    let edifice = se.checked;
-    let gpoc = ra.checked;
-    let calcGFD = dogfd.checked;
-    if(multi.value>50)multi.value=50;
-    if(multi.value<1)multi.value=1;
-    let castnum = Number(multi.value);
-    let minmana = (5+Math.floor(Math.log((1+(level-1)*10)/15+1)*15));
-    manainfo.innerHTML = "With those numbers, your maximum mana would be "+ Math.floor(4+Math.pow(towers,0.6)+Math.log((towers+(level-1)*10)/15+1)*15) +", and the lowest maximum mana you could reach would be " + minmana;
-    let i = 0;
-    for(spell in spells){
-        let me = spells[spell];
-        let mana = maximum;
-        let manacoststr = "";
-        let realmanacost = 0;
-        for(let e = castnum; e>0; e--){
-            let manacost = cost(me.base, me.percent/100, mana);
-            mana-=manacost
-            mana = Math.max(mana,minmana);
+function multiCost(base, percent, magic, castCount, minMagic, str){
+    let manacoststr = "";
+    let realmanacost = 0;
+    let mana = magic;
+    for(let e = castCount; e>0; e--){
+        let manacost = cost(base, percent/100, mana);
+        mana -= manacost
+        mana = Math.max(mana,minMagic);
+        realmanacost += Number(manacost);
+        if(str) {
             manacoststr += manacost;
-            realmanacost += Number(manacost);
-            if(me.customtime!=undefined) break;
             if(e>1){
                 manacoststr+= " + "
             }
-        }      
+        }
+    }
+    return [realmanacost, manacoststr];
+}
+
+
+function getMaxMagic(level, count){
+    return Math.floor(4+Math.pow(count,0.6)+Math.log((count+(level-1)*10)/15+1)*15);
+}
+function calculateStuff(){   
+    
+    //cap values
+    if(count.value<1)count.value=1;
+    if(lvl.value<1)lvl.value=1;
+    if(max.value>10000)max.value=10000;
+    if(max.value<1)max.value=1;
+    if(multi.value>50)multi.value=50;
+    if(multi.value<1)multi.value=1;
+
+    //Initialize variables from input
+    discount = 1-0.1*si.checked-0.01*rb.checked
+    fasterRegen = gudRGN.checked;
+    const towers = Number(count.value);
+    const level = Number(lvl.value);
+    const maximum = Number(max.value);
+    const calcBest = calcBestMagic.checked;
+    const buffs = st.checked;
+    const edifice = se.checked;
+    const gpoc = ra.checked;
+    const calcGFD = dogfd.checked;
+    const castnum = Number(multi.value);
+
+    //max magic calculation
+    const minmana = getMaxMagic(level, 1);
+    manainfo.innerHTML = "With those numbers, your maximum mana would be "+ getMaxMagic(level, towers) +", and the lowest maximum mana you could reach would be " + minmana;
+
+    //spell calculation
+    let i = 0;
+    for(const spell in spells){
+        let me = spells[spell];
         if(me.customtime){
-            if(calcGFD)spelldisplays[i].innerHTML = me.name+":<br>Mana cost: " + manacoststr  +"<br>"+ (averageGFDtime(maximum, !buffs, gpoc, edifice, castnum, 0));
+            if(calcGFD)spelldisplays[i].innerHTML = me.name+":<br>Mana cost: " + cost(me.base, me.percent/100, maximum)  +"<br>"+ (averageGFDtime(maximum, !buffs, gpoc, edifice, castnum, 0));
             else spelldisplays[i].innerHTML = me.name+":<br>Not calculating this right now<br> (Due to your settings)";
         }else{
-            spelldisplays[i].innerHTML = me.name+":<br>Mana cost: " +  manacoststr  +"<br>"+ (maximum<realmanacost? "    Unable to cast":" Recharge time: "+Math.round(getRegenTime(maximum-realmanacost, maximum)*1000)/1000+" seconds");
+            let output = multiCost(me.base, me.percent, maximum, castnum, minmana, true)
+            let realmanacost = output[0];
+            let manacoststr = output[1];
+            let str = me.name+":<br>Mana cost: " +  manacoststr  +"<br>"+ (maximum<realmanacost? "    Unable to cast":" Recharge time: "+Math.round(getRegenTime(maximum-realmanacost, maximum)*1000)/1000+" seconds");
+            let a = 0;
+            let bestTime = 0;
+            if(calcBest){
+                //calculate optimal max magic for spell up to max magic
+                for(let i=5; i<maximum; i++){
+                    let cost = (multiCost(me.base, me.percent, i, castnum, minmana, false))[0];
+                    if(cost > i) continue;
+                    b = getRegenTime(i-cost, i);
+                    if((b<bestTime||a==0)&& !isNaN(b)){
+                        a = i;
+                        bestTime=b;
+                    }
+                }
+            }
+            spelldisplays[i].innerHTML = str + (calcBest?"<br>"+ bestTime.toFixed(2) + " seconds with a maximum mana of " + a:"");
         }
         i++;
     }
 }
 calculateStuff()
+
+
+
+/*
+
+*/
