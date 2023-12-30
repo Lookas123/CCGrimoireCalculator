@@ -44,6 +44,12 @@
   <p id = "spell7"></p>
   <p id = "spell8"></p>
   <p id = "spell9"></p>
+  <input type="text" id="arbitraryCast">
+  <label for="arbitraryCast">Input arbitrary multicast:<br>casts separated by space, supports acronyms (eg. fthof di scp) and specified cost functions (eg. 25%+12) (note that this uses the level and SI/RB fields from above)</label><br>
+  <input type="value" id="ACmagicLeft" min="0" value="0">
+  <label for="ACmagicLeft">Magic left after multicast</label><br>
+  <button onclick="arbitraryCalc()">Calculate arbitrary multicast</button><br>
+  <samp id ="arbitraryCastOutput"></samp>
   <script src="js.js"></script>
 </body>
 </html>

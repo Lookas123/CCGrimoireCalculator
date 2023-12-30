@@ -68,6 +68,9 @@ const ra = document.getElementById("gpoc");
 const dogfd = document.getElementById("dogfd");
 const multi = document.getElementById("multi");
 const gudRGN = document.getElementById("gudRegen");
+const arbitrary = document.getElementById("arbitraryCast");
+const ACmagicLeft = document.getElementById("ACmagicLeft");
+
 let discount = 1;
 let fasterRegen = false;
 let spelldisplays = [];
@@ -205,8 +208,55 @@ function calculateStuff(){
             spelldisplays[i].innerHTML = str + (calcBest?"<br>"+ bestTime.toFixed(2) + " seconds with a maximum mana of " + a:"");
         }
         i++;
-    }
+    }    
 }
+
+function arbitraryCalc(){
+    const level = Number(lvl.value);
+    const minMagic = getMaxMagic(level, 1);
+    const magicleft = Number(ACmagicLeft.value);
+
+
+    const castSet = arbitrary.value;
+    const casts = castSet.split(" ");
+    let str = []
+    for(let e of [100, 10, 1]){
+        let totcost = 0;
+        let towCounts = [];
+        for(let i = casts.length-1; i>-1; i--){       
+            let per = 0;
+            let base = 0;
+            if(spells[casts[i]]){
+                let spell = spells[casts[i]]
+                per = spell.percent;
+                base = spell.base;
+            }else if(casts[i].split("%+").length==2){
+                per = Number(casts[i].split("%+")[0])
+                base = casts[i].split("%+")[1]
+                if(isNaN(per)||isNaN(base)){alert("invalid input"); document.getElementById("arbitraryCastOutput").innerHTML = "you idiot, you fool, you absolute buffoon";return;}
+            }
+            else {alert("invalid input"); document.getElementById("arbitraryCastOutput").innerHTML = "you idiot, you fool, you absolute buffoon";return;}
+
+            //find minimum magic to afford this
+            let b = 0;
+            for(b = minMagic; true;b++){
+                if(magicleft+totcost+cost(base, per/100, b) <= b) break;
+            }
+
+            //find minimum towers
+            let a = 0;
+            for(a = 0; true; a++){
+                if(getMaxMagic(level, a)>=b) break;
+            }
+            if(totcost>0){a = towCounts[0]+e*Math.ceil((a-towCounts[0])/e)}
+            totcost += cost(base, per/100, getMaxMagic(level, a));
+            towCounts.push(a);
+        }
+        str.push("Selling by " + e +"&nbsp".repeat(3-String(e).length)+ ": "+towCounts.join(", ")+" For total of "+totcost+" magic");
+    }
+    document.getElementById("arbitraryCastOutput").innerHTML = str.join("<br>")
+}
+
 calculateStuff()
 
 
