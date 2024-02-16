@@ -226,13 +226,16 @@ function arbitraryCalc(){
         for(let i = casts.length-1; i>-1; i--){       
             let per = 0;
             let base = 0;
-            if(spells[casts[i]]){
-                let spell = spells[casts[i]]
+            let gfd = false;
+            let curCast = casts[i];
+            if(curCast.startsWith("g!")){curCast=curCast.slice(2); gfd=true;} 
+            if(spells[curCast]){
+                let spell = spells[curCast]
                 per = spell.percent;
                 base = spell.base;
-            }else if(casts[i].split("%+").length==2){
-                per = Number(casts[i].split("%+")[0])
-                base = casts[i].split("%+")[1]
+            }else if(curCast.split("%+").length==2){
+                per = Number(curCast.split("%+")[0])
+                base = curCast.split("%+")[1]
                 if(isNaN(per)||isNaN(base)){alert("invalid input"); document.getElementById("arbitraryCastOutput").innerHTML = "you idiot, you fool, you absolute buffoon";return;}
             }
             else {alert("invalid input"); document.getElementById("arbitraryCastOutput").innerHTML = "you idiot, you fool, you absolute buffoon";return;}
@@ -240,8 +243,10 @@ function arbitraryCalc(){
             //find minimum magic to afford this
             let b = 0;
             for(b = minMagic; true;b++){
-                if(magicleft+totcost+cost(base, per/100, b) <= b) break;
+                if(!gfd && magicleft+totcost+cost(base, per/100, b) <= b) break;
+                if(gfd && (magicleft+totcost+cost(base, per/100, b)/2+cost(spells.gfd.base, spells.gfd.percent/100, b)) <= b) break;
             }
+            console.log(b);
 
             //find minimum towers
             let a = 0;
@@ -249,7 +254,8 @@ function arbitraryCalc(){
                 if(getMaxMagic(level, a)>=b) break;
             }
             if(totcost>0){a = towCounts[0]+e*Math.ceil((a-towCounts[0])/e)}
-            totcost += cost(base, per/100, getMaxMagic(level, a));
+            let max = getMaxMagic(level, a)
+            totcost += gfd?cost(base, per/100, max)/2+cost(spells.gfd.base, spells.gfd.percent/100, max):cost(base, per/100, max);
             towCounts.push(a);
         }
         str.push("Selling by " + e +"&nbsp".repeat(3-String(e).length)+ ": "+towCounts.join(", ")+" For total of "+totcost+" magic");
@@ -258,9 +264,3 @@ function arbitraryCalc(){
 }
 
 calculateStuff()
-
-
-
-/*
-
-*/
