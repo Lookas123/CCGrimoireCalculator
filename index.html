@@ -46,7 +46,7 @@
   <p id = "spell9"></p>
   <input type="text" id="arbitraryCast">
   <label for="arbitraryCast">Input arbitrary multicast:<br>casts separated by space, supports acronyms (eg. fthof di scp), gfd casts (start the cast with "g!"), specified cost functions (eg. 25%+12), and bundling without selling with - (eg. fthof-g!fthof) (note that this uses the level and SI/RB fields from above)</label><br>
-  <input type="value" id="ACmagicLeft" min="0" value="0">
+  <input type="number" id="ACmagicLeft" min="0" value="0">
   <label for="ACmagicLeft">Magic left after multicast</label><br>
   <button onclick="arbitraryCalc()">Calculate arbitrary multicast</button><br>
   <samp id ="arbitraryCastOutput"></samp>
