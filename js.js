@@ -211,11 +211,12 @@ function calculateStuff(){
     }    
 }
 
+
 function arbitraryCalc(){
     const level = Number(lvl.value);
     const minMagic = getMaxMagic(level, 1);
     const magicleft = Number(ACmagicLeft.value);
-
+    function error(str="invalid input"){alert(str); document.getElementById("arbitraryCastOutput").innerHTML = "you idiot, you fool, you absolute buffoon";}
 
     const castSet = arbitrary.value;
     const casts = castSet.split(" ");
@@ -235,14 +236,16 @@ function arbitraryCalc(){
                     let spell = spells[curCasts[i]]
                     per[i] = spell.percent;
                     base[i] = spell.base;
-                }else if(curCast.split("%+").length==2){
-                    per[i] = Number(curCast.split("%+")[0])
-                    base[i] = curCast.split("%+")[1]
-                    if(isNaN(per[i])||isNaN(base[i])){alert("invalid input"); document.getElementById("arbitraryCastOutput").innerHTML = "you idiot, you fool, you absolute buffoon";return;}
+                }else if(curCasts[i].split("%+").length==2){
+                    per[i] = Number(curCasts[i].split("%+")[0])
+                    base[i] = curCasts[i].split("%+")[1]
+                    if(isNaN(per[i])||isNaN(base[i])){error("Couldn't parse numbers in: "+curCasts[i]);return;}
                 }
-                else {alert("invalid input"); document.getElementById("arbitraryCastOutput").innerHTML = "you idiot, you fool, you absolute buffoon";return;}
+                else {error("Couldn't parse cast: "+curCasts[i]);return;}
             }
-
+            let persum = per.reduce((sum, val)=>{return sum+val});
+            let basesum = base.reduce((sum, val)=>{return sum+val});
+            if((persum * discount == 100 && basesum>0) || persum * discount > 100){error("Go get a better discount for cast set: " + curCast + "(or blame nyan cat if you could actually cast this)");return;}
             //find minimum magic to afford this
             let b = 0;
             for(b = minMagic; true;b++){
