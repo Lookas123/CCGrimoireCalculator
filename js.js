@@ -245,7 +245,6 @@ function arbitraryCalc(){
             }
             let persum = per.reduce((sum, val, index)=>{return sum+(gfd[index]?(0.5*val + spells.gfd.percent):val)},0);
             let basesum = base.reduce((sum, val, index)=>{return sum+(gfd[index]?(0.5*val + spells.gfd.base):val)},0);
-            console.log(persum);
             if((persum * discount == 100 && basesum>0) || persum * discount > 100){error("Go get a better discount for cast set: " + curCast + "(or blame nyan cat if you could actually cast this)");return;}
             //find minimum magic to afford this
             let b = 0;
@@ -261,18 +260,33 @@ function arbitraryCalc(){
             }
 
             //find minimum towers
-            let a = 0;
-            for(a = 0; true; a++){
-                if(getMaxMagic(level, a)>=b) break;
+            let towers = 1;
+            let low = 1;
+            let high = Infinity;
+            while(true){
+                //too low
+                if(getMaxMagic(level, towers)<b) {
+                    low = towers;
+                    if(high == Infinity) towers=low*2;
+                    else towers = Math.floor((high+low)/2);
+                    continue;
+                }
+                //too high
+                if(getMaxMagic(level, towers)>=b && getMaxMagic(level,towers-1)>=b) {
+                    high = towers; towers = Math.floor((high+low)/2);
+                    continue;
+                }
+                //right value
+                break;
             }
-            if(totcost>0){a = towCounts[0]+e*Math.ceil((a-towCounts[0])/e)}
-            let max = getMaxMagic(level, a)
+            if(totcost>0){towers = towCounts[0]+e*Math.ceil((towers-towCounts[0])/e)}
+            let max = getMaxMagic(level, towers)
             
             for(let i = 0; i<curCasts.length;i++){
                 if(gfd[i]) totcost += cost(base[i], per[i]/100, max)/2+cost(spells.gfd.base, spells.gfd.percent/100, max)
                 else totcost+=cost(base[i], per[i]/100, max)
             }
-            towCounts.push(a);
+            towCounts.push(towers);
         }
         str.push("Selling by " + e +"&nbsp".repeat(3-String(e).length)+ ": "+towCounts.join(", ")+" For total of "+totcost+" magic");
     }
