@@ -224,7 +224,7 @@ function arbitraryCalc(){
     for(let e of [100, 10, 1]){
         let totcost = 0;
         let towCounts = [];
-        for(let i = casts.length-1; i>-1; i--){       
+        for(let i = casts.length-1; i>-1; i--){
             let curCast = casts[i];
             let curCasts=curCast.split("-");
             let per = new Array(curCasts.length)
@@ -243,8 +243,9 @@ function arbitraryCalc(){
                 }
                 else {error("Couldn't parse cast: "+curCasts[i]);return;}
             }
-            let persum = per.reduce((sum, val)=>{return sum+val});
-            let basesum = base.reduce((sum, val)=>{return sum+val});
+            let persum = per.reduce((sum, val, index)=>{return sum+(gfd[index]?(0.5*val + spells.gfd.percent):val)},0);
+            let basesum = base.reduce((sum, val, index)=>{return sum+(gfd[index]?(0.5*val + spells.gfd.base):val)},0);
+            console.log(persum);
             if((persum * discount == 100 && basesum>0) || persum * discount > 100){error("Go get a better discount for cast set: " + curCast + "(or blame nyan cat if you could actually cast this)");return;}
             //find minimum magic to afford this
             let b = 0;
@@ -258,7 +259,6 @@ function arbitraryCalc(){
                     break;
                 }
             }
-            console.log(b);
 
             //find minimum towers
             let a = 0;
